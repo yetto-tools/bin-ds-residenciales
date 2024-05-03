@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>DS-Residenciales</title> 
+        <!--link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min1.css" rel="stylesheet" /-->
+        <link href="css/styles.css" rel="stylesheet" />
+        <!--script src="js/fa_all.js" crossorigin="anonymous"></script-->
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <script src="js/util.js"></script>
+    </head>
+    <body class="sb-nav-fixed">
+        <!--header th:replace="layout/plantilla :: header"></header-->
+    <th:block th:replace="~{layout/plantilla :: header}"></th:block>
+    <!-- barra vertical -->
+    <div id="layoutSidenav">
+        <!--div th:replace="layout/plantilla :: menu" id="layoutSidenav_nav"></div-->
+        <th:block th:replace="~{layout/plantilla :: menu}"></th:block>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+                    <h1 class="mt-4">Solicitud de Servicio</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item active"></li>
+                    </ol>
+
+                    <nav class="navbar navbar-light bg-light">
+                        <form class="container-fluid justify-content-start">
+                            <a sec:authorize="hasRole('ROLE_USER')" class="btn btn-outline-success me-2" role="button" th:href="@{/agregarsolicitud}">Crear Solicitud de Servicio       <i class="fa-solid fa-circle-plus"></i></a>
+                        </form>
+                    </nav>
+                    
+                    
+                    
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <i class="fas fa-table me-1"></i>
+                                    Solicitudes
+                                </div>
+                                <div class="card-body">
+                                    <!-- menu panel -->
+                                    <ul class="nav nav-tabs" id="myTabs">
+
+                                        <li class="nav-item">
+                                            <a class="nav-link active" data-bs-toggle="tab" href="#abiertas">Abiertas</a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-bs-toggle="tab" href="#cerradas">Cerradas</a>
+                                        </li>
+                                    </ul>
+                                    
+                                        <div class="tab-content" id="myTabsContent">
+                                            <div class="tab-pane active" id="abiertas">
+                                                <div th:if="${solicitudes != null and !solicitudes.empty}">
+                                                <ol class="list-group list-group-numbered">
+                                                    <li th:each="solicitud : ${solicitudes}" class="list-group-item d-flex justify-content-between align-items-start" >
+                                                        <div class="ms-2 me-auto">
+                                                            <div class="fw-bold" th:text="${solicitud.asunto}"></div>
+                                                            <span th:text="${solicitud.servicio.descripcion}"></span>
+                                                            <p class="mb-1" th:text="'Usuario: ' + ${solicitud.usuario.nombre}"></p>   
+                                                            <p class="mb-1" th:text="'Estado: ' + ${solicitud.estado==4?'Cerrado':'Activo'}"></p>
+                                                            <a class="btn btn-outline-success" role="button" th:href="@{/modificarsolicitud(idSolicitud=${solicitud.idSolicitud})}">Leer</i></a>
+                                                            <a class="btn btn-danger" role="button" th:onclick="confirmarEliminacion([[(${solicitud.idSolicitud})]],'/cerrarsolicitud?idSolicitud=');" th:text="Cerrar"/>
+                                                        </div>
+                                                        <span class="badge bg-primary rounded-pill" th:text="'Solicitud #' + ${solicitud.idSolicitud}"></span>
+                                                    </li>
+                                                </ol>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane" id="cerradas">
+                                                <div th:if="${solicitudesCerradas != null and !solicitudesCerradas.empty}">
+                                                
+                                                    <ol class="list-group list-group-numbered">
+                                                        <li th:each="solicitud : ${solicitudesCerradas}" class="list-group-item d-flex justify-content-between align-items-start" >
+                                                            <div class="ms-2 me-auto">
+                                                                <div class="fw-bold" th:text="${solicitud.asunto}"></div>
+                                                                <span th:text="${solicitud.servicio.descripcion}"></span>
+                                                                <p class="mb-1" th:text="'Usuario: ' + ${solicitud.usuario.nombre}"></p>   
+                                                                <p class="mb-1" th:text="'Estado: ' + ${solicitud.estado==4?'Cerrado':'Activo'}"></p>
+                                                                <a class="btn btn-outline-success" role="button" th:href="@{/modificarsolicitud(idSolicitud=${solicitud.idSolicitud})}">Leer</i></a>
+                                                                <a class="btn btn-danger" role="button" th:onclick="confirmarEliminacion([[(${solicitud.idSolicitud})]],'/cerrarsolicitud?idSolicitud=');" th:text="Cerrar"/>
+                                                            </div>
+                                                            <span class="badge bg-primary rounded-pill" th:text="'Solicitud #' + ${solicitud.idSolicitud}"></span>
+                                                        </li>
+                                                    </ol>
+                                                </div>
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                    </div>
+                
+            </main>
+            <!--footer th:replace="layout/plantilla :: footer"></footer-->  
+            <th:block th:replace="~{layout/plantilla :: footer}"></th:block>
+        </div>
+    </div>
+    <script src="js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="js/scripts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+    <script src="assets/demo/chart-area-demo.js"></script>
+    <script src="assets/demo/chart-bar-demo.js"></script>
+    <script src="js/simple-datatables.min.js" crossorigin="anonymous"></script>
+    <script src="js/datatables-simple-demo.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/mensajes.js"></script>
+</body>
+</html>

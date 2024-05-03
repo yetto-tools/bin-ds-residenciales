@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>DS-Residenciales</title>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min1.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <script src="js/util.js"></script>
+    </head>
+    <body class="sb-nav-fixed">
+        <!--header th:replace="layout/plantilla :: header"></header-->
+    <th:block th:replace="~{layout/plantilla :: header}"></th:block>
+    <!-- barra vertical -->
+    <div id="layoutSidenav">
+        <!--div th:replace="layout/plantilla :: menu" id="layoutSidenav_nav"></div-->
+        <th:block th:replace="~{layout/plantilla :: menu}"></th:block>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+                    <h1 class="mt-4">Anomalias</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item active"></li>
+                    </ol>
+
+                    <nav class="navbar navbar-light bg-light">
+                        <form class="container-fluid justify-content-start">
+                            <a class="btn btn-outline-success me-2" role="button" th:href="@{/agregaranomalia}">Crear Anomalia        <i class="fa-solid fa-person-circle-plus"></i></a>
+                        </form>
+                    </nav>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-table me-1"></i>
+                            Anomalias
+                        </div>
+
+                        <div class="card-body">
+                            
+                            <ul class="nav nav-tabs" id="myTabs">
+                                <li th:each="estado : ${estadosTicket}" class="nav-item">
+                                    <a th:class="'nav-link ' + ${estado.idEstado==1?'active':''}" data-bs-toggle="tab" th:href="'#id_'+${estado.idEstado}" th:text="${estado.nombre}" style="font-size: 14px;"></a>
+                                </li>
+                            </ul>
+                            <div th:if="${anomalias != null and !anomalias.empty}">
+                                <div class="tab-content" id="myTabsContent">
+                                    <div th:each="estado : ${estadosTicket}" class="tab-pane" th:id="'id_'+${estado.idEstado}" >
+                                        <ol class="list-group list-group-numbered">
+                                            <li th:each="ticket : ${anomalias}" class="list-group-item d-flex justify-content-between align-items-start" th:if="${estado.idEstado}==${ticket.estado.idEstado}">
+                                                <div class="ms-2 me-auto">
+                                                    <div class="fw-bold" th:text="${ticket.asunto}"></div>
+                                                    <span th:text="${ticket.descripcion}"></span>
+                                                    <table>
+                                                        <tr>
+                                                            <td width='100px'>Usuario:</td>
+                                                            <td><p class="mb-1" th:text="' ' + ${ticket.usuario.nombre}"></p>  </td> 
+                                                        </tr>
+                                                        <tr>
+                                                            <td>Estado:</td>
+                                                            <td><p class="mb-1" th:text="' ' + ${ticket.estado.nombre}"></p></td>
+                                                        </tr>
+                                                    </table>
+                                                    <a class="btn btn-outline-success" role="button" th:href="@{/editaranomalia(idTicket=${ticket.idTicket})}"  data-bs-dismiss="collapse">Leer</i></a>
+
+                                                </div>
+                                                <span class="badge bg-primary rounded-pill" th:text="'#' + ${ticket.idTicket}"></span>
+                                            </li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <!--footer th:replace="layout/plantilla :: footer"></footer-->  
+            <th:block th:replace="~{layout/plantilla :: footer}"></th:block>
+        </div>
+    </div>
+
+</script>
+<script src="js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="js/scripts.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<script src="assets/demo/chart-area-demo.js"></script>
+<script src="assets/demo/chart-bar-demo.js"></script>
+<script src="js/simple-datatables.min.js" crossorigin="anonymous"></script>
+<script src="js/datatables-simple-demo.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/mensajes.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="js/mensajes.js"></script>
+<script>
+    // Función para mostrar/ocultar los paneles según la selección
+    function mostrarOcultarPaneles() {
+        var selectedEstado = document.querySelector('.nav-link.active').getAttribute('href').replace('#id_', '');
+        var tabPanes = document.querySelectorAll(".tab-pane");
+
+        tabPanes.forEach(function (pane) {
+            if (pane.id === "id_" + selectedEstado) {
+                pane.style.display = "block";
+            } else {
+                pane.style.display = "none";
+            }
+        });
+    }
+
+    // Llamar a la función al cargar la página
+    document.addEventListener("DOMContentLoaded", function () {
+        mostrarOcultarPaneles();
+    });
+
+    // Agregar el evento de clic al tab
+    var tabLinks = document.querySelectorAll('.nav-link');
+    tabLinks.forEach(function (link) {
+        link.addEventListener('click', function () {
+            mostrarOcultarPaneles();
+        });
+    });
+</script>
+
+</body>
+</html>
