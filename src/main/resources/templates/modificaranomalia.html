@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>DS-Residenciales</title>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <link rel="stylesheet" th:href="@{/css/styles-ticket.css}">
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <style>
+            #txtcomentario {
+                /* width: 100%; */
+            }
+
+            #customFile {
+                margin-left: 10px;
+            }
+
+
+
+            /* Ajusta el ancho máximo de la vista previa */
+            #file-preview {
+                max-width: 100%;
+            }
+        </style>
+    </head>
+    <body class="sb-nav-fixed">
+
+    <th:block th:replace="~{layout/plantilla :: header}"></th:block>
+    <!-- barra vertical -->
+    <div id="layoutSidenav">
+        <th:block th:replace="~{layout/plantilla :: menu}"></th:block> 
+
+        <div id="layoutSidenav_content">
+            <main>
+                <div th:object="${ticket}"></div>
+                <div th:object="${comentarios}"></div>
+                <div th:object="${estadosTicket}"></div>
+                <div class="container">
+
+                    <div class="row justify-content-center">
+                        <div class="col-lg-7 col-md-12">
+                            <div class="card">
+                                <div class="card-header" >
+                                    <a class="btn-close" th:href="@{/anomalia}"></a>
+                                    <div  class="text-center mx-auto" th:utext="'<b>' + ${ticket.asunto} + '</b>'"></div>
+
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div  th:utext="'Descripción: ' + ${ticket.descripcion}"></div>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="chat col-10">
+
+                                            <div th:if="${comentarios != null and !comentarios.empty}">
+                                                <table>
+                                                    <tr th:each="comment : ${comentarios}">
+                                                    <div class="conversacion">
+                                                        <div th:if="${comment.comentario}!=''" th:class="${comment.usuario.nombreUsuario == #authentication.principal.getUsername() ? 'mensaje pregunta' : 'mensaje respuesta'}" th:text="${comment.comentario}"></div>
+                                                        <div th:if="${comment.adjunto}!='' and ${comment.adjunto}!=null" th:class="${comment.usuario.nombreUsuario == #authentication.principal.getUsername() ? 'mensaje pregunta' : 'mensaje respuesta'}" >
+                                                            <!-- Verificar si el archivo adjunto es una imagen -->
+                                                            <div th:if="${comment.adjunto.endsWith('.jpg') or comment.adjunto.endsWith('.jpeg') or comment.adjunto.endsWith('.png') or comment.adjunto.endsWith('.gif')}">
+                                                                <img th:src="@{__${comment.adjunto}__}" alt="Vista previa" style="max-width: 100px; max-height: 100px;">
+                                                            </div>
+                                                            <!-- Verificar si el archivo adjunto es un documento -->
+                                                            <div th:if="${comment.adjunto.endsWith('.pdf') or comment.adjunto.endsWith('.doc') or comment.adjunto.endsWith('.docx')}">
+                                                                <img th:src="@{/images/doc.png}" alt="Vista previa de documento" style="max-width: 100px; max-height: 80px;">
+                                                            </div>
+                                                            <!-- Enlaces para descargar el archivo -->
+                                                            <a th:href="@{__${comment.adjunto}__}" download ><i class="fa-solid fa-download"></i></a>
+                                                        </div>
+                                                    </div>
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+
+                                        <form th:action="@{guardarcomentario}" method="post" enctype="multipart/form-data" width="100%">
+                                            <div class="caja-mensaje ">
+                                                <div  class="row">
+                                                    <input type="hidden" id="idticket" name="idticket" th:value="${ticket.idTicket}"/>
+                                                    <div class="col-8">
+                                                        <textarea id="txtcomentario" name="txtcomentario" placeholder="Escribe acá" style="width: 100%; height: 100px;" th:readonly="${ticket.estado.idEstado == 4}"></textarea>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="row">
+                                                            <label class="custom-file-label small d-flex justify-content-center align-items-center mb-0 mb-md-2" for="customFile">
+                                                                <span class="mr-2">Adjuntar <span style="visibility: hidden;">.</span></span>
+                                                                <i class="fas fa-paperclip"></i>
+                                                                <input type="file" class="form-control border border-primary" id="customFile" name="file" style="display: none;">
+                                                            </label>
+                                                        </div>
+                                                        <div class="row mt-4">
+                                                            <button class="btn btn-primary" id="btnEnviar" type="submit" th:disabled="${ticket.estado.idEstado == 4}">
+                                                                <i class="fas fa-paper-plane"></i> Enviar
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-9">
+                                                        <div id="preview-container" style="display: none;">
+                                                            <img id="file-preview" src="#" alt="Vista previa" style="max-width: 25%; max-height: 75px;">
+                                                            <span id="name-preview"></span>
+
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="col-1">
+                                                        <a class="btn btn-danger"  id="clearFileInput" type="button" style="display: none;width: 50px;height: 30px;"><i class="fas fa-times"> </i></a>
+                                                    </div>
+                                                    <div class="col-2"></div>
+                                                </div>
+                                            </div>
+                                        </form>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-12 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+
+                                </div>
+                                <div class="card-body">
+                                    <form th:action="@{estadoTicket}" enctype="multipart/form-data"  method="post" th:object="${ticket}">
+                                        <input type="hidden" id="idTicket" th:field="*{idTicket}"/>
+                                        <div class="row">
+                                            <label>Estado:</label>
+                                        </div>
+                                        <div class="row"></div>
+                                        <div class="row">
+                                            <select class="form-control" id="cmbServ" aria-label="Tipo servicio" width="100%" th:field="*{estado}">
+                                                <option th:each="status : ${estadosTicket}" th:value="${status.idEstado}" th:text="${status.nombre}"></option>
+                                            </select>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row">
+                                        <button type="submit" id="btnGuardar" class="btn btn-outline-primary" >Guardar</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="card">
+                                <div class="card-header text-center">
+                                    Contacto
+                                </div>
+                                <div class="card-body">
+                                    <span th:if="${ticket.usuario.foto != null and not #strings.isEmpty(ticket.usuario.foto)}">
+                                        <div class="text-center">
+                                            <img th:src="${ticket.usuario.foto}" alt="Foto usuario" class="logo-image" style="width: 30%;"/>
+                                        </div>
+                                    </span>
+                                    <span th:text="'Usuario: ' + ${ticket.usuario.nombre}"></span><br/>
+                                    <span th:text="'Direccion:' + ${ticket.usuario.direccion}"></span><br/>
+                                    <span th:text="'Codigo:' + ${ticket.usuario.codigo!= null?ticket.usuario.codigo:''}"></span><br/>
+                                    <span th:text="'Telefono:' + ${ticket.usuario.telefono}"></span><br/>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="row">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <th:block th:replace="~{layout/plantilla :: footer}"></th:block>    
+        </div>
+
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('customFile');
+        const textarea = document.getElementById('txtcomentario');
+        const previewContainer = document.getElementById('preview-container');
+        const filePreview = document.getElementById('file-preview');
+        const fileIcon = document.getElementById('file-icon');
+        const namePreview = document.getElementById('name-preview');
+        const clearFileButton = document.getElementById('clearFileInput');
+
+        fileInput.addEventListener('change', function () {
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    if (file.type.startsWith('image/')) {
+                        filePreview.src = e.target.result;
+                    } else {
+                        filePreview.src = "/images/doc.png"
+                    }
+                    previewContainer.style.display = 'block';
+                    namePreview.textContent = file.name;
+                    clearFileButton.style.display = 'block';
+                };
+
+                reader.readAsDataURL(file);
+            }
+        });
+
+        clearFileButton.addEventListener('click', function () {
+            const fileInput = document.getElementById('customFile');
+            fileInput.value = ''; // Limpia el valor del campo de carga de archivos
+            clearFileButton.style.display = 'none'; // Oculta el botón "X"
+            previewContainer.style.display = 'none';
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="js/scripts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+    <script src="assets/demo/chart-area-demo.js"></script>
+    <script src="assets/demo/chart-bar-demo.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+    <script src="js/datatables-simple-demo.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="js/mensajes.js"></script>
+</body>
+</html>
